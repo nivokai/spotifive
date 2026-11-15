@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spotifive</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="brand-name">Spotifive</span>
+      </div>
+      <nav id="nav-main" class="nav" aria-label="Navigation principale"></nav>
+      <div class="nav-title">
+        <span>Playlists</span>
+        <button id="new-playlist" class="icon-btn" title="Nouvelle playlist" aria-label="Nouvelle playlist"></button>
+      </div>
+      <nav id="nav-playlists" class="nav nav-scroll" aria-label="Playlists"></nav>
+      <div id="update-slot"></div>
+    </aside>
+
+    <main id="main">
+      <header id="topbar">
+        <div class="history">
+          <button id="nav-back" class="icon-btn round" title="Retour" aria-label="Retour"></button>
+          <button id="nav-forward" class="icon-btn round" title="Suivant" aria-label="Suivant"></button>
+        </div>
+        <label class="search" for="search-input">
+          <span class="search-icon" aria-hidden="true"></span>
+          <input id="search-input" type="search" placeholder="Titres, artistes, albums, radios…" autocomplete="off" spellcheck="false">
+        </label>
+        <button id="open-settings" class="icon-btn round" title="Réglages" aria-label="Réglages"></button>
+      </header>
+      <div id="view" tabindex="-1"></div>
+    </main>
+
+    <aside id="queue" hidden aria-label="File d'attente">
+      <div class="queue-head">
+        <h2>File d'attente</h2>
+        <button id="queue-close" class="icon-btn" title="Fermer" aria-label="Fermer la file d'attente"></button>
+      </div>
+      <div id="queue-list"></div>
+    </aside>
+
+    <footer id="player" aria-label="Lecteur">
+      <div class="now">
+        <div id="now-art" class="art"></div>
+        <div class="now-text">
+          <div id="now-title" class="now-title">Rien en lecture</div>
+          <div id="now-artist" class="now-artist">Choisis un titre pour commencer</div>
+        </div>
+        <button id="now-like" class="icon-btn" title="Ajouter aux titres aimés" aria-label="Ajouter aux titres aimés" hidden></button>
+      </div>
+
+      <div class="transport">
+        <div class="buttons">
+          <button id="btn-shuffle" class="icon-btn" title="Lecture aléatoire" aria-label="Lecture aléatoire"></button>
+          <button id="btn-prev" class="icon-btn" title="Précédent" aria-label="Précédent"></button>
+          <button id="btn-play" class="play-btn" title="Lecture" aria-label="Lecture"></button>
+          <button id="btn-next" class="icon-btn" title="Suivant" aria-label="Suivant"></button>
+          <button id="btn-repeat" class="icon-btn" title="Répéter" aria-label="Répéter"></button>
+        </div>
+        <div class="timeline">
+          <span id="time-current" class="time">0:00</span>
+          <input id="seek" class="slider" type="range" min="0" max="1000" value="0" step="1" aria-label="Position dans le titre" disabled>
+          <span id="time-total" class="time">0:00</span>
+        </div>
+      </div>
+
+      <div class="extras">
+        <button id="btn-queue" class="icon-btn" title="File d'attente" aria-label="File d'attente"></button>
+        <button id="btn-mute" class="icon-btn" title="Couper le son" aria-label="Couper le son"></button>
+        <input id="volume" class="slider volume" type="range" min="0" max="100" value="80" step="1" aria-label="Volume">
+      </div>
+    </footer>
+  </div>
+
+  <div id="menu" class="menu" hidden role="menu"></div>
+  <div id="modal" class="modal" hidden></div>
+  <div id="toasts" aria-live="polite"></div>
+  <audio id="audio" preload="auto"></audio>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

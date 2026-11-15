@@ -1,0 +1,16 @@
+{
+  "name": "spotifive",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Lecteur de musique libre et gratuit (Rust + Tauri)",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "tauri": "tauri",
+    "ui": "node dev/serve.mjs",
+    "release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
