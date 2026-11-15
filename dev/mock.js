@@ -72,6 +72,14 @@ const commands = {
   collection_detail: ({ id }) => ({ collection: { ...collection(0), id }, tracks: tracks(12) }),
   radio_search: () => stations(24),
   radio_click: () => null,
+  // Dans l'aperçu, la page YouTube Music n'existe pas : la zone réservée affiche ce message.
+  catalogue_show: () => {
+    throw new Error('Aperçu : YouTube Music ne s’affiche que dans la vraie application.');
+  },
+  catalogue_bounds: () => null,
+  catalogue_hide: () => null,
+  catalogue_pause: () => null,
+  catalogue_nav: () => null,
   library_get: () => library,
   library_add_folder: async () => {
     for (let done = 100; done <= 400; done += 100) {

@@ -8,6 +8,7 @@ import * as store from './store.js';
 import { closeMenu, debounce, el, fmtTime, icon, setIcon, toast } from './ui.js';
 import * as updates from './updates.js';
 import './views.js';
+import './catalogue.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -31,6 +32,7 @@ document.querySelector('.search-icon').append(icon('search', 18));
 
 const NAV = [
   { name: 'home', label: 'Accueil', icon: 'home' },
+  { name: 'catalogue', label: 'Tout le catalogue', icon: 'globe' },
   { name: 'radios', label: 'Radios', icon: 'radio' },
   { name: 'likes', label: 'Titres aimés', icon: 'heart' },
   { name: 'local', label: 'Fichiers locaux', icon: 'folder' },
@@ -316,6 +318,8 @@ window.addEventListener('keydown', (event) => {
   if (event.altKey && key === 'ArrowRight') return router.forward();
   // Dans un champ de saisie, les touches gardent leur rôle habituel (déplacer le curseur, écrire).
   if (typing) return;
+  // Sur la page du catalogue, le lecteur de Spotifive est masqué : ses raccourcis ne doivent rien déclencher.
+  if (router.route()?.name === 'catalogue') return;
   if (event.ctrlKey && key === 'ArrowRight') return player.next();
   if (event.ctrlKey && key === 'ArrowLeft') return player.prev();
   if (event.ctrlKey || event.altKey || event.metaKey) return;

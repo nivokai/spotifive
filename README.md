@@ -6,12 +6,18 @@ Spotifive ne diffuse que de la musique dont l'écoute gratuite est autorisée :
 
 | Source | Contenu |
 | --- | --- |
+| **YouTube Music** (page « Tout le catalogue ») | Tout le catalogue mondial, titres entiers : le site officiel affiché dans l'application, avec ses publicités |
 | **Audius** | Titres et playlists publiés par les artistes eux-mêmes |
 | **Radio Browser** | Des dizaines de milliers de radios en direct, dans tous les pays |
 | **Internet Archive** | Albums de netlabels en licence libre et concerts dont l'enregistrement est autorisé |
 | **Fichiers locaux** | La musique déjà présente sur le PC (MP3, FLAC, M4A, OGG, Opus, WAV) |
 
-Il n'existe pas de source légale donnant accès gratuitement à tout le catalogue commercial : Spotifive n'en utilise donc aucune.
+Le catalogue commercial n'est accessible gratuitement et légalement que par les services financés par la publicité.
+Spotifive affiche donc le site officiel de YouTube Music dans une zone de sa fenêtre, tel quel : rien n'est copié,
+téléchargé ni modifié, et les publicités restent en place. Cette page n'a accès à aucune commande de l'application,
+et ses titres ne rejoignent pas les playlists ni la file d'attente de Spotifive.
+
+Sources écartées après lecture de leurs conditions : l'API de Deezer (réservée à un usage privé non distribué).
 
 ## Fonctions
 
@@ -27,6 +33,7 @@ Il n'existe pas de source légale donnant accès gratuitement à tout le catalog
 ```
 src-tauri/           Backend Rust
   src/sources/       Audius, Internet Archive, Radio Browser
+  src/catalogue.rs   Page YouTube Music intégrée à la fenêtre
   src/library.rs     Bibliothèque locale (étiquettes, pochettes, index)
   src/store.rs       Sauvegarde des favoris, playlists et réglages
   src/updater.rs     Mise à jour automatique

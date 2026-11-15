@@ -1,3 +1,4 @@
+mod catalogue;
 mod error;
 mod http;
 mod library;
@@ -146,7 +147,9 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(catalogue::Catalogue::default())
         .setup(|app| {
             let data_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&data_dir)?;
@@ -168,6 +171,11 @@ pub fn run() {
             collection_detail,
             radio_search,
             radio_click,
+            catalogue::catalogue_show,
+            catalogue::catalogue_bounds,
+            catalogue::catalogue_hide,
+            catalogue::catalogue_pause,
+            catalogue::catalogue_nav,
             library::library_get,
             library::library_add_folder,
             library::library_remove_folder,

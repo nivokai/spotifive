@@ -287,6 +287,45 @@ h1 { font: 700 30px/1.15 "Segoe UI Variable Display", "Segoe UI", sans-serif; le
 .empty p { max-width: 46ch; }
 .empty .btn { margin-top: 10px; }
 
+/* ---------- Bandeau « Tout le catalogue » ---------- */
+
+.promo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(255, 179, 107, .16), rgba(255, 107, 74, .1) 55%, rgba(255, 107, 74, .03));
+  border: 1px solid rgba(255, 140, 90, .28);
+  text-align: left;
+  transition: border-color .15s, filter .15s;
+}
+.promo:hover { border-color: rgba(255, 160, 110, .6); filter: brightness(1.08); }
+.promo > .icon { color: var(--accent-2); }
+.promo-text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.promo-text strong { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.promo-text span { color: var(--muted); font-size: 13px; }
+
+/* ---------- Page web intégrée (YouTube Music) ---------- */
+
+.web-page { display: flex; flex-direction: column; height: 100%; }
+.web-bar { display: flex; align-items: center; gap: 4px; padding: 0 24px 8px; }
+.web-note { margin-left: 10px; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.web-note strong { color: var(--text); }
+.web-holder { flex: 1; min-height: 0; display: grid; place-items: center; background: #030303; border-top: 1px solid var(--line); }
+.web-loading { display: grid; justify-items: center; gap: 12px; color: var(--muted); }
+.web-loading .icon { animation: spin .9s linear infinite; }
+
+/* Sur cette page, c'est le lecteur de YouTube Music qui sert : celui de Spotifive s'efface pour lui laisser la place. */
+body.web-open #app { grid-template-rows: minmax(0, 1fr) 0; }
+body.web-open #player { display: none; }
+
+/* La page web recouvre la zone centrale : les messages s'affichent alors au-dessus de la barre latérale. */
+body.web-open #view { overflow: hidden; }
+body.web-open #toasts { left: 12px; bottom: 16px; transform: none; justify-items: start; }
+body.web-open .toast { max-width: calc(var(--sidebar-w) - 24px); border-radius: 12px; }
+
 /* ---------- Pochettes ---------- */
 
 .art {

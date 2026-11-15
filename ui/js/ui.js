@@ -114,6 +114,25 @@ export function toast(message, kind = 'info') {
   setTimeout(() => node.remove(), 4000);
 }
 
+// ---------- Éléments affichés par-dessus la page (menus, fenêtres) ----------
+// La page YouTube Music intégrée est une vraie fenêtre posée au-dessus de l'interface :
+// elle doit s'effacer le temps qu'un menu ou une fenêtre de dialogue soit ouvert.
+
+const overlayListeners = new Set();
+let overlays = 0;
+
+/** Prévient quand un menu ou une fenêtre s'ouvre (`true`) puis quand tout est refermé (`false`). */
+export function onOverlay(listener) {
+  overlayListeners.add(listener);
+}
+
+function overlay(change) {
+  const before = overlays > 0;
+  overlays = Math.max(0, overlays + change);
+  const after = overlays > 0;
+  if (before !== after) for (const listener of overlayListeners) listener(after);
+}
+
 // ---------- Menu contextuel ----------
 
 const menu = document.getElementById('menu');
@@ -151,6 +170,7 @@ export function openMenu(anchor, items, { onClose } = {}) {
     }),
   );
   menu.hidden = false;
+  overlay(1);
 
   const rect = anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : { left: anchor.x, right: anchor.x, top: anchor.y, bottom: anchor.y };
   const { offsetWidth: width, offsetHeight: height } = menu;
@@ -180,6 +200,7 @@ export function openMenu(anchor, items, { onClose } = {}) {
   menuCleanup = () => {
     cancelled = true;
     menu.hidden = true;
+    overlay(-1);
     window.removeEventListener('pointerdown', onPointer, true);
     window.removeEventListener('keydown', onKey, true);
     window.removeEventListener('resize', closeMenu);
@@ -197,7 +218,11 @@ const modal = document.getElementById('modal');
 function showDialog(build) {
   return new Promise((resolve) => {
     const previous = document.activeElement;
+    let done = false;
     const finish = (value) => {
+      if (done) return;
+      done = true;
+      overlay(-1);
       modal.hidden = true;
       modal.replaceChildren();
       window.removeEventListener('keydown', onKey, true);
@@ -213,6 +238,7 @@ function showDialog(build) {
     const dialog = el('div', { class: 'dialog', role: 'dialog', 'aria-modal': 'true' }, build(finish));
     modal.replaceChildren(dialog);
     modal.hidden = false;
+    overlay(1);
     modal.onpointerdown = (event) => {
       if (event.target === modal) finish(null);
     };

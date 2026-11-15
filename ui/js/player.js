@@ -99,6 +99,8 @@ async function begin(position) {
   state.index = position;
   state.loading = true;
   audio.pause();
+  // Un seul son à la fois : si YouTube Music joue dans sa page, on le met en pause.
+  call('catalogue_pause').catch(() => {});
   emit('track');
   emit('time');
 
@@ -198,16 +200,29 @@ export function removeAt(position) {
   emit('queue');
 }
 
+/** Met en pause, y compris si un titre est encore en train de se charger. */
+export function pause() {
+  const track = current();
+  if (!track) return;
+  if (state.loading) {
+    loadToken += 1; // annule le chargement en cours
+    state.loading = false;
+  }
+  audio.pause();
+  if (track.live) {
+    // Inutile de continuer à télécharger un direct mis en pause.
+    audio.removeAttribute('src');
+    audio.load();
+  }
+  state.playing = false;
+  emit('state');
+}
+
 export function toggle() {
   const track = current();
   if (!track || state.loading) return;
   if (!audio.paused) {
-    audio.pause();
-    if (track.live) {
-      // Inutile de continuer à télécharger un direct mis en pause.
-      audio.removeAttribute('src');
-      audio.load();
-    }
+    pause();
   } else if (track.live || !audio.currentSrc) {
     begin(state.index);
   } else {

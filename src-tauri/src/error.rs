@@ -9,6 +9,8 @@ pub enum AppError {
     Io(#[from] std::io::Error),
     #[error("Données illisibles : {0}")]
     Json(#[from] serde_json::Error),
+    #[error("Problème d'affichage : {0}")]
+    Window(#[from] tauri::Error),
     #[error("{0}")]
     Msg(String),
 }

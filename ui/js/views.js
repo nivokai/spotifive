@@ -84,6 +84,26 @@ const page = (...children) => el('div', { class: 'page' }, children);
 const stack = (...children) => el('div', { class: 'stack' }, children);
 const linkTo = (label, target) => el('button', { class: 'link', text: label, onclick: () => router.navigate(target) });
 
+/** Bandeau qui ouvre YouTube Music dans l'application, éventuellement sur une recherche. */
+function catalogueBanner(query) {
+  return el(
+    'button',
+    { class: 'promo', onclick: () => router.navigate(query ? { name: 'catalogue', q: query } : { name: 'catalogue' }) },
+    icon('globe', 30),
+    el(
+      'div',
+      { class: 'promo-text' },
+      el('strong', { text: query ? `Chercher « ${query} » dans tout le catalogue` : 'Tout le catalogue mondial' }),
+      el('span', {
+        text: query
+          ? 'Tous les artistes et tous les titres, en entier, avec YouTube Music intégré.'
+          : 'Tous les artistes et tous les titres, en entier : YouTube Music intégré, gratuit avec ses publicités.',
+      }),
+    ),
+    el('span', { class: 'btn primary', text: query ? 'Chercher' : 'Ouvrir' }),
+  );
+}
+
 function notice(errors) {
   return errors?.length ? el('div', { class: 'notice', text: `Source indisponible pour le moment — ${errors.join(' · ')}` }) : null;
 }
@@ -157,7 +177,8 @@ router.register('home', () => {
   );
 
   return page(
-    el('div', null, el('h1', { text: greeting }), el('p', { class: 'lead', text: 'Musique libre, radios du monde entier et tes propres fichiers.' })),
+    el('div', null, el('h1', { text: greeting }), el('p', { class: 'lead', text: 'Tout le catalogue mondial, de la musique libre, des radios et tes propres fichiers.' })),
+    catalogueBanner(),
     recent.length > 0 && section('Écoutés récemment', cards(recent.map((_, position) => playCard(recent, position)), true)),
     slot,
   );
@@ -215,19 +236,19 @@ router.register('search', (route) => {
       if (!found) {
         return [
           notice(data.errors),
-          emptyState('search', 'Aucun résultat', 'Vérifie l’orthographe, ou essaie le nom d’un style de musique ou d’une radio.'),
+          emptyState('search', 'Rien dans la musique libre ni les radios', 'Le bandeau ci-dessus cherche dans tout le catalogue mondial.'),
         ];
       }
       return [
         notice(data.errors),
-        data.tracks.length && section('Titres', trackList(data.tracks, { limit: 40 })),
+        data.tracks.length && section('Titres en musique libre (Audius)', trackList(data.tracks, { limit: 40 })),
         data.playlists.length && section('Playlists et albums sur Audius', cards(data.playlists.map(collectionCard))),
         data.albums.length && section('Albums sur Internet Archive', cards(data.albums.map(collectionCard))),
         data.radios.length && section('Radios', cards(data.radios.map((_, position) => playCard(data.radios, position)))),
       ];
     },
   );
-  return page(el('h1', { text: `Résultats pour « ${route.q} »` }), slot);
+  return page(el('h1', { text: `Résultats pour « ${route.q} »` }), catalogueBanner(route.q), slot);
 });
 
 // ---------- Album ou playlist en ligne ----------
@@ -557,6 +578,7 @@ router.register('settings', () => {
       el(
         'div',
         { class: 'sources' },
+        source('globe', 'YouTube Music (Tout le catalogue)', 'Le site officiel de YouTube Music, affiché tel quel dans l’application avec ses publicités. Spotifive ne copie et ne télécharge rien ; les titres de cette page ne rejoignent pas tes playlists Spotifive.'),
         source('note', 'Audius', 'Plateforme de streaming ouverte où les artistes publient eux-mêmes leurs titres.'),
         source('radio', 'Radio Browser', 'Annuaire communautaire de radios du monde entier. Chaque radio diffuse sous sa propre licence.'),
         source('archive', 'Internet Archive', 'Albums de netlabels en licence libre et concerts dont l’enregistrement est autorisé par les artistes.'),
