@@ -25,6 +25,9 @@ pub struct Track {
     /// Vrai pour un flux en direct (radio).
     #[serde(default)]
     pub live: bool,
+    /// Vrai si la source autorise le téléchargement pour une écoute hors ligne.
+    #[serde(default)]
+    pub downloadable: bool,
 }
 
 /// Un album ou une playlist en ligne.

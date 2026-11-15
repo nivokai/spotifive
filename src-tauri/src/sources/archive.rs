@@ -28,8 +28,19 @@ fn sanitize(query: &str) -> String {
         .join(" ")
 }
 
-fn cover(identifier: &str) -> String {
+pub(crate) fn cover(identifier: &str) -> String {
     format!("https://archive.org/services/img/{identifier}")
+}
+
+/// Adresse de téléchargement d'un fichier, d'après l'identifiant de titre `album/fichier`.
+/// Renvoie aussi l'identifiant de l'album. Refuse tout chemin qui sortirait de l'album.
+pub(crate) fn download_url(track: &str) -> Option<(String, &str)> {
+    let (identifier, name) = track.split_once('/')?;
+    let inside = !name.is_empty()
+        && !name.contains('\\')
+        && name.split('/').all(|part| !part.is_empty() && part != "." && part != "..");
+    (valid_identifier(identifier) && inside)
+        .then(|| (format!("https://archive.org/download/{identifier}/{}", encode_path(name)), identifier))
 }
 
 fn encode_path(name: &str) -> String {
@@ -170,6 +181,8 @@ pub async fn album(client: &Client, identifier: &str) -> Result<CollectionDetail
                 mirrors: Vec::new(),
                 info: None,
                 live: false,
+                // Netlabels et concerts autorisés : ces fichiers sont proposés en téléchargement libre.
+                downloadable: true,
             };
             Some((number, name.to_string(), track))
         })
@@ -209,6 +222,18 @@ mod tests {
         assert!(format_rank("128Kbps MP3") < format_rank("Ogg Vorbis"));
         assert!(format_rank("Ogg Vorbis") < format_rank("Flac"));
         assert_eq!(format_rank("PNG"), None);
+    }
+
+    #[test]
+    fn download_address_stays_inside_the_album() {
+        let (url, album) = download_url("ird059/disc 1/01 track.mp3").unwrap();
+        assert_eq!(url, "https://archive.org/download/ird059/disc%201/01%20track.mp3");
+        assert_eq!(album, "ird059");
+        assert!(download_url("ird059/../secret.mp3").is_none());
+        assert!(download_url("ird059/a\\b.mp3").is_none());
+        assert!(download_url("bad id/file.mp3").is_none());
+        assert!(download_url("ird059/").is_none());
+        assert!(download_url("ird059").is_none());
     }
 
     #[test]

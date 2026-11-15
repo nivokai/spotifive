@@ -14,6 +14,7 @@ import {
   skeletonRows,
   trackList,
 } from './components.js';
+import * as downloads from './downloads.js';
 import * as player from './player.js';
 import * as router from './router.js';
 import * as store from './store.js';
@@ -115,6 +116,30 @@ function playActions(tracks, ...more) {
     el('button', { class: 'btn primary', disabled: !tracks.length, onclick: () => player.playList(tracks, 0) }, icon('play', 16), 'Lire'),
     el('button', { class: 'btn', disabled: tracks.length < 2, onclick: () => player.playShuffled(tracks) }, icon('shuffle', 16), 'Aléatoire'),
     more,
+  );
+}
+
+/** Bouton « Télécharger » d'un album : seuls les titres dont la source l'autorise sont pris. */
+function downloadButton(tracks) {
+  const allowed = tracks.filter(downloads.canDownload);
+  if (!allowed.length) return null;
+  const start = async () => {
+    if (allowed.length > 20) {
+      const yes = await askConfirm({
+        title: `Télécharger ${allowed.length} titres ?`,
+        message: 'Ils seront enregistrés dans le dossier Musique\\Spotifive et ajoutés à Fichiers locaux.',
+        confirm: 'Télécharger',
+      });
+      if (!yes) return;
+    }
+    const added = downloads.download(allowed);
+    toast(added ? plural(added, 'téléchargement lancé', 'téléchargements lancés') : 'Téléchargement déjà en cours');
+  };
+  return el(
+    'button',
+    { class: 'btn', title: 'Enregistrer pour écouter hors ligne', onclick: start },
+    icon('download', 16),
+    allowed.length === tracks.length ? 'Télécharger' : `Télécharger (${allowed.length})`,
   );
 }
 
@@ -265,6 +290,7 @@ router.register('collection', (route) => {
         title: collection.title,
         sub: [collection.subtitle, plural(tracks.length, 'titre', 'titres'), totalDuration(tracks)].filter(Boolean).join(' · '),
         tracks,
+        actions: [downloadButton(tracks)],
       }),
       tracks.length
         ? trackList(tracks)
@@ -412,6 +438,12 @@ let scanning = false;
 let scanProgress = null;
 let localFilter = '';
 
+// Une série de téléchargements terminée : les nouveaux fichiers rejoignent la bibliothèque.
+downloads.onLibrary((result) => {
+  library = result;
+  if (router.route()?.name === 'local') router.refresh();
+});
+
 on('library://progress', (progress) => {
   scanProgress = progress;
   const label = document.getElementById('scan-status');
@@ -554,6 +586,11 @@ router.register('settings', () => {
     },
   }, icon('refresh', 16), 'Rechercher une mise à jour');
 
+  const downloadFolder = el('strong', { text: '…' });
+  call('downloads_folder')
+    .then((path) => (downloadFolder.textContent = path))
+    .catch(() => (downloadFolder.textContent = 'Musique\\Spotifive'));
+
   const source = (iconName, name, text) =>
     el('div', { class: 'source' }, icon(iconName, 22), el('div', null, el('strong', { text: name }), el('p', { text })));
 
@@ -583,6 +620,20 @@ router.register('settings', () => {
         source('radio', 'Radio Browser', 'Annuaire communautaire de radios du monde entier. Chaque radio diffuse sous sa propre licence.'),
         source('archive', 'Internet Archive', 'Albums de netlabels en licence libre et concerts dont l’enregistrement est autorisé par les artistes.'),
         source('folder', 'Fichiers locaux', 'Ta propre musique, lue depuis ton disque. Rien n’est envoyé sur Internet.'),
+      ),
+    ),
+    el(
+      'div',
+      { class: 'panel' },
+      el('h2', { text: 'Téléchargements' }),
+      el('p', {
+        text: 'Le menu « … » d’un titre propose « Télécharger » quand la source l’autorise : les titres Audius dont l’artiste a activé le téléchargement, et les albums d’Internet Archive. Les radios et YouTube Music ne se téléchargent pas.',
+      }),
+      el('p', null, 'Les fichiers sont rangés dans ', downloadFolder, ' et apparaissent dans Fichiers locaux.'),
+      el(
+        'div',
+        { class: 'actions' },
+        el('button', { class: 'btn', onclick: () => call('downloads_open').catch((error) => toast(String(error), 'error')) }, icon('folder', 16), 'Ouvrir le dossier'),
       ),
     ),
     el(

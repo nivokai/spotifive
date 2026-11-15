@@ -185,6 +185,10 @@ h1, h2, h3, p { margin: 0; }
 .update-card strong { display: block; margin-bottom: 2px; }
 .update-card p { color: var(--muted); font-size: 12.5px; margin-bottom: 10px; }
 .update-card .btn { width: 100%; justify-content: center; }
+.dl-card { margin-top: 10px; padding: 12px; border-radius: var(--radius); background: var(--panel-2); border: 1px solid var(--line); }
+.dl-card strong { display: block; font-size: 13px; }
+.dl-item { margin-top: 8px; }
+.dl-item span { display: block; margin-bottom: 4px; color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .progress { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .12); overflow: hidden; }
 .progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-2), var(--accent)); transition: width .2s; }
 

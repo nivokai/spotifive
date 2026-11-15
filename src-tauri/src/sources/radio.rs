@@ -81,6 +81,7 @@ fn station(value: &Value) -> Option<Track> {
         mirrors: Vec::new(),
         info,
         live: true,
+        downloadable: false,
     })
 }
 

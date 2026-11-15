@@ -24,6 +24,7 @@ const track = (i, extra = {}) => ({
   mirrors: [],
   info: 'Ambient',
   live: false,
+  downloadable: i % 2 === 0,
   ...extra,
 });
 
@@ -101,6 +102,16 @@ const commands = {
     await wait(400);
     return library;
   },
+  download_track: async ({ request }) => {
+    for (let received = 0; received <= 100; received += 20) {
+      await wait(250);
+      emit('download://progress', { id: request.id, received, total: 100 });
+    }
+    return { status: 'done', path: `C:\\Users\\demo\\Music\\Spotifive\\${request.artist} - ${request.title}.mp3` };
+  },
+  downloads_finish: () => library,
+  downloads_folder: () => 'C:\\Users\\demo\\Music\\Spotifive',
+  downloads_open: () => null,
   state_load: () => JSON.parse(localStorage.getItem('spotifive-apercu') || 'null'),
   state_save: ({ state }) => localStorage.setItem('spotifive-apercu', JSON.stringify(state)),
   update_check: () => (location.search.includes('update') ? { version: '0.2.0', current: '0.1.0', notes: null } : null),

@@ -16,7 +16,7 @@ const DEFAULTS = {
 };
 
 const RECENT_MAX = 24;
-const TRACK_FIELDS = ['id', 'source', 'title', 'artist', 'album', 'duration', 'artwork', 'thumb', 'url', 'mirrors', 'info', 'live'];
+const TRACK_FIELDS = ['id', 'source', 'title', 'artist', 'album', 'duration', 'artwork', 'thumb', 'url', 'mirrors', 'info', 'live', 'downloadable'];
 
 let data = structuredClone(DEFAULTS);
 let likedIds = new Set();

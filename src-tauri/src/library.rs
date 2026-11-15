@@ -100,6 +100,22 @@ impl Library {
         Ok(())
     }
 
+    /// Ajoute un dossier à la bibliothèque s'il n'y est pas, autorise sa lecture, puis réanalyse.
+    pub(crate) fn include_folder(&self, app: &AppHandle, folder: &Path) -> Result<LibraryView> {
+        app.asset_protocol_scope()
+            .allow_directory(folder, true)
+            .map_err(|error| AppError::msg(format!("Accès au dossier refusé : {error}")))?;
+        let folder_text = folder.to_string_lossy().into_owned();
+        {
+            let mut index = self.index.lock().unwrap();
+            if !index.folders.contains(&folder_text) {
+                index.folders.push(folder_text);
+            }
+        }
+        self.rescan(app)?;
+        Ok(self.view())
+    }
+
     fn rescan(&self, app: &AppHandle) -> Result<()> {
         let (folders, previous) = {
             let index = self.index.lock().unwrap();
@@ -127,6 +143,7 @@ fn to_track(entry: &Entry) -> Track {
         mirrors: Vec::new(),
         info: None,
         live: false,
+        downloadable: false,
     }
 }
 
@@ -260,7 +277,7 @@ fn save_cover(covers_dir: &Path, data: &[u8], extension: &str) -> Option<String>
     target.exists().then(|| target.to_string_lossy().into_owned())
 }
 
-async fn blocking<T, F>(task: F) -> Result<T>
+pub(crate) async fn blocking<T, F>(task: F) -> Result<T>
 where
     T: Send + 'static,
     F: FnOnce() -> Result<T> + Send + 'static,
@@ -293,18 +310,7 @@ pub async fn library_add_folder(
         let folder = picked
             .into_path()
             .map_err(|error| AppError::msg(format!("Dossier inutilisable : {error}")))?;
-        let folder_text = folder.to_string_lossy().into_owned();
-        app.asset_protocol_scope()
-            .allow_directory(&folder, true)
-            .map_err(|error| AppError::msg(format!("Accès au dossier refusé : {error}")))?;
-        {
-            let mut index = library.index.lock().unwrap();
-            if !index.folders.contains(&folder_text) {
-                index.folders.push(folder_text);
-            }
-        }
-        library.rescan(&app)?;
-        Ok(Some(library.view()))
+        library.include_folder(&app, &folder).map(Some)
     })
     .await
 }

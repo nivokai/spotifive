@@ -2,6 +2,7 @@
 
 import { isTauri } from './api.js';
 import { art, likeButton, markCurrent, markLikes, newPlaylistFlow, trackMenu } from './components.js';
+import * as downloads from './downloads.js';
 import * as player from './player.js';
 import * as router from './router.js';
 import * as store from './store.js';
@@ -269,6 +270,31 @@ function toggleQueue(force) {
 
 $('btn-queue').addEventListener('click', () => toggleQueue());
 $('queue-close').addEventListener('click', () => toggleQueue(false));
+
+// ---------- Téléchargements en cours ----------
+
+downloads.subscribe(() => {
+  const slot = $('download-slot');
+  const jobs = downloads.list();
+  if (!jobs.length) return slot.replaceChildren();
+  const active = jobs.filter((job) => job.state === 'running');
+  slot.replaceChildren(
+    el(
+      'div',
+      { class: 'dl-card' },
+      el('strong', { text: jobs.length > 1 ? `${jobs.length} téléchargements en cours` : 'Téléchargement en cours' }),
+      active.map((job) => {
+        const percent = job.total ? Math.round((job.received / job.total) * 100) : null;
+        return el(
+          'div',
+          { class: 'dl-item' },
+          el('span', { text: percent == null ? job.track.title : `${percent} % · ${job.track.title}`, title: job.track.title }),
+          el('div', { class: 'progress' }, el('i', { style: { width: `${percent ?? 6}%` } })),
+        );
+      }),
+    ),
+  );
+});
 
 // ---------- Mises à jour ----------
 

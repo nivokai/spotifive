@@ -1,6 +1,7 @@
 // Composants réutilisés par les pages : pochettes, listes de titres, cartes, menus.
 
 import { mediaUrl } from './api.js';
+import * as downloads from './downloads.js';
 import * as player from './player.js';
 import * as router from './router.js';
 import * as store from './store.js';
@@ -116,6 +117,18 @@ export function trackMenu(track, anchor, { extra = [], onClose } = {}) {
         icon: 'heart',
         action: () => store.toggleLike(track),
       },
+      // Proposé uniquement quand la source autorise le téléchargement.
+      ...(downloads.canDownload(track)
+        ? [
+            {
+              label: downloads.isQueued(track.id) ? 'Téléchargement en cours…' : 'Télécharger pour écouter hors ligne',
+              icon: 'download',
+              action: () => {
+                if (downloads.download(track)) toast('Téléchargement lancé');
+              },
+            },
+          ]
+        : []),
       ...extra,
       { separator: true },
       { heading: 'Ajouter à une playlist' },

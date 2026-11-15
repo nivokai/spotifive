@@ -1,4 +1,5 @@
 mod catalogue;
+mod downloads;
 mod error;
 mod http;
 mod library;
@@ -17,7 +18,7 @@ use model::{Collection, CollectionDetail, Track};
 use sources::{archive, audius, radio};
 
 /// Client HTTP partagé par toutes les commandes.
-struct Net(reqwest::Client);
+pub(crate) struct Net(pub(crate) reqwest::Client);
 
 #[derive(Serialize)]
 struct Home {
@@ -150,6 +151,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(catalogue::Catalogue::default())
+        .manage(downloads::Downloads::new())
         .setup(|app| {
             let data_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&data_dir)?;
@@ -176,6 +178,10 @@ pub fn run() {
             catalogue::catalogue_hide,
             catalogue::catalogue_pause,
             catalogue::catalogue_nav,
+            downloads::download_track,
+            downloads::downloads_finish,
+            downloads::downloads_folder,
+            downloads::downloads_open,
             library::library_get,
             library::library_add_folder,
             library::library_remove_folder,

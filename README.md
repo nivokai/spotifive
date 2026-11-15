@@ -24,6 +24,8 @@ Sources écartées après lecture de leurs conditions : l'API de Deezer (réserv
 - Recherche unique sur toutes les sources, interrogées en parallèle
 - Tendances par genre, radios par pays et par style
 - Titres aimés, playlists, file d'attente, lecture aléatoire et répétition
+- Téléchargement pour l'écoute hors ligne, uniquement quand la source l'autorise (titres Audius dont
+  l'artiste a activé le téléchargement, albums d'Internet Archive) ; les fichiers vont dans `Musique\Spotifive`
 - Bibliothèque locale analysée sur tous les cœurs du processeur, avec index sur disque
 - Touches multimédia du clavier et raccourcis
 - Mise à jour automatique signée
@@ -34,6 +36,7 @@ Sources écartées après lecture de leurs conditions : l'API de Deezer (réserv
 src-tauri/           Backend Rust
   src/sources/       Audius, Internet Archive, Radio Browser
   src/catalogue.rs   Page YouTube Music intégrée à la fenêtre
+  src/downloads.rs   Téléchargement hors ligne des sources qui l'autorisent
   src/library.rs     Bibliothèque locale (étiquettes, pochettes, index)
   src/store.rs       Sauvegarde des favoris, playlists et réglages
   src/updater.rs     Mise à jour automatique

@@ -66,6 +66,41 @@ fn track_from(value: &Value) -> Option<Track> {
             .filter(|genre| !genre.is_empty())
             .map(str::to_string),
         live: false,
+        // Audius ne fournit un lien de téléchargement que si l'artiste l'a activé sans condition.
+        downloadable: value.pointer("/download/url").and_then(Value::as_str).is_some(),
+    })
+}
+
+/// Ce qu'il faut pour télécharger un titre : adresses à essayer, extension du fichier d'origine, pochette.
+pub struct DownloadInfo {
+    pub urls: Vec<String>,
+    pub extension: Option<String>,
+    pub artwork: Option<String>,
+}
+
+/// Redemande le lien de téléchargement d'un titre. Échoue si l'artiste ne l'autorise pas.
+pub async fn download_info(client: &Client, id: &str) -> Result<DownloadInfo> {
+    if !valid_id(id) {
+        return Err(AppError::msg("Identifiant de titre invalide"));
+    }
+    let body = get_json(client, &format!("{BASE}/tracks/{id}"), &[("app_name", APP_NAME)]).await?;
+    let track = body.get("data").ok_or_else(|| AppError::msg("Titre introuvable"))?;
+    let url = track
+        .pointer("/download/url")
+        .and_then(Value::as_str)
+        .ok_or_else(|| AppError::msg("L'artiste n'autorise pas le téléchargement de ce titre"))?;
+    let mut urls = vec![url.to_string()];
+    if let Some(mirrors) = track.pointer("/download/mirrors").and_then(Value::as_array) {
+        urls.extend(mirrors.iter().filter_map(Value::as_str).filter_map(|mirror| swap_origin(url, mirror)));
+    }
+    Ok(DownloadInfo {
+        urls,
+        extension: track
+            .get("orig_filename")
+            .and_then(Value::as_str)
+            .and_then(|name| name.rsplit_once('.'))
+            .map(|(_, extension)| extension.to_ascii_lowercase()),
+        artwork: image(track, "480x480").or_else(|| image(track, "150x150")),
     })
 }
 
